@@ -79,19 +79,22 @@ async def gemini_agent(task, model_name:str="gemini-2.0-flash-lite-preview-02-05
     if not api_key:
         raise ValueError("APIキーが設定されていません。設定画面から設定してください。")
 
-    browser = Browser(
-        config=BrowserConfig(
-            chrome_instance_path=chrome_path,
+    try:
+        browser = Browser(
+            config=BrowserConfig(
+                chrome_instance_path=chrome_path,
+            )
         )
-    )
 
-    agent = Agent(
-        task=task,
-        llm=ChatGoogleGenerativeAI(
-            model=model_name,
-            api_key=api_key,
-        ),
-        browser=browser
-    )
-    result = await agent.run()
-    return result.final_result()
+        agent = Agent(
+            task=task,
+            llm=ChatGoogleGenerativeAI(
+                model=model_name,
+                api_key=api_key,
+            ),
+            browser=browser
+        )
+        result = await agent.run()
+        return result.final_result()
+    except Exception as e:
+        return f"エラーが発生しました: {str(e)}"

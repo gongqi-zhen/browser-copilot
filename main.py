@@ -100,10 +100,14 @@ level_two_system_prompt = r"""
 def speak(text):
     """
     pyttsx3を使用してテキストを音声合成します。
+    エラーが発生した場合は、エラーメッセージを表示して続行します。
     """
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
+    try:
+        engine = pyttsx3.init()
+        engine.say(text)
+        engine.runAndWait()
+    except Exception as e:
+        print(f"音声合成中にエラーが発生しました: {str(e)}")
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
@@ -210,55 +214,73 @@ def main_task_loop():
             break
 
         # 2. 音声ファイルができたので Groq Whisper API で文字起こし
-        with open(audio_filename, "rb") as file:
-            transcription = client_groq.audio.transcriptions.create(
-                file=(audio_filename, file.read()),
-                model="whisper-large-v3-turbo",
-                prompt="",
-                response_format="json",
-                language="ja",
-                temperature=0.0
-            )
-        user_text = transcription.text.strip()
-        print("【音声認識結果】", user_text)
+        try:
+            with open(audio_filename, "rb") as file:
+                transcription = client_groq.audio.transcriptions.create(
+                    file=(audio_filename, file.read()),
+                    model="whisper-large-v3-turbo",
+                    prompt="",
+                    response_format="json",
+                    language="ja",
+                    temperature=0.0
+                )
+            user_text = transcription.text.strip()
+            print("【音声認識結果】", user_text)
 
-        if not user_text:
-            print("音声認識結果が空です。会話を終了します。")
-            break
+            if not user_text:
+                print("音声認識結果が空です。会話を終了します。")
+                break
+        except Exception as e:
+            print(f"音声認識中にエラーが発生しました: {str(e)}")
+            speak("音声認識中にエラーが発生しました。もう一度お試しください。")
+            continue
 
         # 3. Chat Completion API へ
-        if level == 0:
-            chat_history.append({"role": "user", "content": user_text})
-            response = gemini_chat(chat_history, level_zero_system_prompt)
-            extracted_tasks = extract_tag(response, "text", "task")
-            if extracted_tasks:
-                task = extracted_tasks[0]
-            else:
-                print("タスクが抽出されませんでした。前回のタスクを維持します。")
-            chat_history.append({"role": "assistant", "content": response})
-            print("AI: " + response)
-            level += 1
-
-        elif level == 1:
-            if user_text == "You have control":
-                speak("I have control.")
-                level += 1
-            else:
+        try:
+            if level == 0:
                 chat_history.append({"role": "user", "content": user_text})
-                response = gemini_chat(chat_history, level_one_system_prompt)
+                response = gemini_chat(chat_history, level_zero_system_prompt)
                 extracted_tasks = extract_tag(response, "text", "task")
                 if extracted_tasks:
-                    task = extracted_tasks[0]
+                    task = extracted_tasks
                 else:
                     print("タスクが抽出されませんでした。前回のタスクを維持します。")
                 chat_history.append({"role": "assistant", "content": response})
                 print("AI: " + response)
+                level += 1
+
+            elif level == 1:
+                if user_text == "You have control":
+                    speak("I have control.")
+                    level += 1
+                else:
+                    chat_history.append({"role": "user", "content": user_text})
+                    response = gemini_chat(chat_history, level_one_system_prompt)
+                    extracted_tasks = extract_tag(response, "text", "task")
+                    if extracted_tasks:
+                        task = extracted_tasks
+                    else:
+                        print("タスクが抽出されませんでした。前回のタスクを維持します。")
+                    chat_history.append({"role": "assistant", "content": response})
+                    print("AI: " + response)
+        except Exception as e:
+            error_message = f"AIモデルとの通信中にエラーが発生しました: {str(e)}"
+            print(error_message)
+            speak(error_message)
+            continue
 
         if level == 2:
             print("AI: 実行しました。")
-            results = gemini_agent(task)
-            response = gemini_chat([{"role": "user", "content": str(results)}], level_two_system_prompt)
-            print("AI: " + str(response))
+            try:
+                print("実行中のタスク:"+str(task))
+                results = gemini_agent(task)
+                level = 0
+                response = gemini_chat([{"role": "user", "content": str(results)}], level_two_system_prompt)
+                print("AI: " + str(response))
+            except Exception as e:
+                error_message = f"タスク実行中にエラーが発生しました: {str(e)}"
+                print("AI: " + error_message)
+                response = error_message
 
         # 4. 応答を TTS で読み上げる
         print("読み上げ開始…")
@@ -269,20 +291,37 @@ def main_task_loop():
     print("プログラムを終了します。")
 
 def main():
-    while True:
-        voice_text = ""
-        while voice_text != "ハローベータ":
-            with sr.Microphone() as source:
-                print("Listening...")
-                voice = listener.listen(source)
+    try:
+        while True:
+            voice_text = ""
+            while voice_text != "ハローベータ":
                 try:
-                    voice_text = listener.recognize_google(voice, language="ja-JP")
-                except sr.UnknownValueError:
-                    print("音声が認識できませんでした。もう一度お試しください。")
+                    with sr.Microphone() as source:
+                        print("Listening...")
+                        voice = listener.listen(source)
+                        try:
+                            voice_text = listener.recognize_google(voice, language="ja-JP")
+                        except sr.UnknownValueError:
+                            print("音声が認識できませんでした。もう一度お試しください。")
+                            continue
+                        except sr.RequestError as e:
+                            print(f"Google Speech Recognition サービスに接続できませんでした: {e}")
+                            time.sleep(2)  # 少し待機してから再試行
+                            continue
+                        print(voice_text)
+                except Exception as e:
+                    print(f"マイク入力中にエラーが発生しました: {e}")
+                    time.sleep(2)  # 少し待機してから再試行
                     continue
-                print(voice_text)
-        speak("認識しました。ご用件をお願いします。")
-        main_task_loop()
+                    
+            speak("認識しました。ご用件をお願いします。")
+            main_task_loop()
+    except KeyboardInterrupt:
+        print("\nプログラムが中断されました。終了します。")
+    except Exception as e:
+        print(f"予期せぬエラーが発生しました: {e}")
+    finally:
+        print("プログラムを終了します。")
 
 if __name__ == "__main__":
     main()
