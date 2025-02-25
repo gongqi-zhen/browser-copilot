@@ -26,27 +26,6 @@ SYSTEM_PROMPT = """
 あなたは優秀なAIアシスタントです。
 """
 
-def groq_chat(
-    user_inputs, system_prompt=SYSTEM_PROMPT, main_model="llama3.1-70b-8192"
-):
-    if type(user_inputs) == str:
-        input_messages_list = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_inputs},
-        ]
-    elif type(user_inputs) == list:
-        input_messages_list = user_inputs.copy()  # コピーを作成
-        input_messages_list.insert(0, {"role": "system", "content": system_prompt})
-    else:
-        raise ValueError(
-            "user_inputs should be a string or a list."
-        )  # エラーハンドリングを追加
-
-    completion = client_groq.chat.completions.create(
-        messages=input_messages_list, model=main_model
-    )
-    return completion.choices[0].message.content
-
 def gemini_chat(user_inputs,system_prompt = SYSTEM_PROMPT,main_model="gemini-2.0-flash"):
     gemini_model = genai.GenerativeModel(
         model_name= main_model,

@@ -1,8 +1,8 @@
 import time
 import wave
-import subprocess
 import numpy as np
 import pyaudio
+import pyttsx3
 import speech_recognition as sr
 from src.API_functions import client_groq, extract_tag, gemini_agent, gemini_chat
 
@@ -95,8 +95,16 @@ level_two_system_prompt = r"""
 """
 
 # -------------------------
-# 録音パラメータの設定
+# 音声合成と録音パラメータの設定
 # -------------------------
+def speak(text):
+    """
+    pyttsx3を使用してテキストを音声合成します。
+    """
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
+
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -233,7 +241,7 @@ def main_task_loop():
 
         elif level == 1:
             if user_text == "You have control":
-                subprocess.run(["say", "I have control."])
+                speak("I have control.")
                 level += 1
             else:
                 chat_history.append({"role": "user", "content": user_text})
@@ -254,7 +262,7 @@ def main_task_loop():
 
         # 4. 応答を TTS で読み上げる
         print("読み上げ開始…")
-        subprocess.run(["say", response])
+        speak(response)
         print("読み上げ終了。")
         # => 再度ループして録音開始 (ユーザーが黙れば終了、話せば継続)
 
@@ -273,7 +281,7 @@ def main():
                     print("音声が認識できませんでした。もう一度お試しください。")
                     continue
                 print(voice_text)
-        subprocess.run(["say", "認識しました。ご用件をお願いします。"])
+        speak("認識しました。ご用件をお願いします。")
         main_task_loop()
 
 if __name__ == "__main__":
