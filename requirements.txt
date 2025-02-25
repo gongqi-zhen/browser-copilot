@@ -1,0 +1,11 @@
+groq
+google-generativeai
+
+python-dotenv
+
+pyaudio
+SpeechRecognition
+numpy
+
+langchain-google-genai
+browser-use
