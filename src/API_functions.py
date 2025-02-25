@@ -112,7 +112,7 @@ async def gemini_agent(task, model_name:str="gemini-2.0-flash-lite-preview-02-05
             model=model_name,
             api_key=api_key,
         ),
-        # browser=browser
+        browser=browser
     )
     result = await agent.run()
     return result.final_result()
