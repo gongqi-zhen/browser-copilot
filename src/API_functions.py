@@ -71,7 +71,7 @@ def sync_wrapper(async_func):
     return sync_func
 
 @sync_wrapper
-async def gemini_agent(task, model_name:str="gemini-2.0-flash-lite-preview-02-05"):
+async def gemini_agent(task, model_name:str="gemini-2.0-pro-exp-02-05"):
     # データベースから設定を取得
     api_key = os.environ.get("GEMINI_API_KEY")
     chrome_path = os.environ.get("CHROME_BROWSER_PATH")
