@@ -1,53 +1,69 @@
-## browser-copilot
+# Browser-Copilot
 
-### 概要
-このプロジェクトはブラウザで動作するエージェントです。
-ブラウザを使用中にこのエージェントを呼び出すことでタスクを引き継ぐことができます。
-タスクを引き継ぐことで他のタスクに集中することができます。
+ブラウザ操作を自動化するAIアシスタント
 
-### インストール方法
-1. このリポジトリをクローンします。
-```bash
-git clone 
-cd browser-copilot
-```
-2. 仮想環境に入り、必要なパッケージをインストールします。
-```bash
-python3 -m venv env
+## 📋 概要
 
-source venv/bin/activate # macOS, Linuxの場合
-.\venv\Scripts\activate # WindowsのPowerShell
+Browser-Copilotは、ブラウザ上で動作するAIエージェントです。ブラウザ使用中にこのエージェントを音声で呼び出すことで、タスクを引き継ぎ自動化できます。これにより、ユーザーは他の重要なタスクに集中することが可能になります。
 
-pip install -r requirements.txt
-```
-3. playwrightをインストールする(未インストールの場合)
-```bash
-playwright install
-```
-5. .envファイルを作成する。
-.envファイルを作成して、.env.exampleをコピーしてください。
-.env.exampleを参考にして、APIキーを設定してください。
-必要になるAPIキーはGroqのAPIキーとGeminiのAPIキーです。
+## 🚀 インストール方法
 
+### 前提条件
+- Python 3.x
+- Git
 
-### 使い方
-1.エージェントを起動して下さい。
-```bash
-python main.py
-```
-2.browser-copilotを呼び出す。
-「ハローベータ」と呼び出すことでbrowser-copilotがアクティブ状態になります。
+### 手順
+1. **リポジトリのクローン**
+   ```bash
+   git clone https://github.com/foxn2000/browser-copilot.git
+   cd browser-copilot
+   ```
 
-3.タスクを入力する。
-引き継ぐ or 新規タスクを音声で入力して下さい。
+2. **仮想環境のセットアップと依存パッケージのインストール**
+   ```bash
+   # 仮想環境の作成
+   python3 -m venv env
 
-3.タスクの確認と認証をする。
-AIが設計したタスクが音声で読み上げられるので、「You have control」と音声で入力し、タスクが実行されます。
-（AIはまだ完璧ではないため、AIがタスクを実行している時も、ブラウザから目を離すことはしないでください。）
+   # 仮想環境の有効化
+   # macOS/Linuxの場合
+   source env/bin/activate
+   # Windowsの場合
+   .\env\Scripts\activate
 
-4.タスクの完了を確認する。
-タスクが完了したらリザルトが音声で読み上げられます。
+   # 依存パッケージのインストール
+   pip install -r requirements.txt
+   ```
 
-### ライセンス
-このプロジェクトはMITライセンスの下でライセンスされています。
-詳細については、LICENSEファイルを参照してください。
+3. **Playwrightのインストール**（未インストールの場合）
+   ```bash
+   playwright install
+   ```
+
+4. **環境設定ファイルの作成**
+   - `.env.example`ファイルをコピーして`.env`ファイルを作成
+   - 必要なAPIキー（GroqとGemini）を`.env`ファイルに設定
+
+## 💻 使い方
+
+1. **エージェントの起動**
+   ```bash
+   python main.py
+   ```
+
+2. **Browser-Copilotの呼び出し**
+   - 「ハローベータ」と音声で呼びかけることでエージェントがアクティブになります
+
+3. **タスクの指示**
+   - 引き継ぎたいタスクまたは新規タスクを音声で入力します
+
+4. **タスクの確認と認証**
+   - AIが設計したタスクが音声で読み上げられます
+   - 「You have control」と音声で応答するとタスクが実行されます
+   - ⚠️ **注意**: AIの動作中もブラウザから目を離さないでください
+
+5. **タスク完了の確認**
+   - タスク完了後、結果が音声で読み上げられます
+
+## ⚖️ ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。詳細については[LICENSE](./LICENSE)ファイルを参照してください。
