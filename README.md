@@ -41,7 +41,7 @@ Browser-Copilotは、ブラウザ上で動作するAIエージェントです。
 
 4. **環境設定ファイルの作成**
    - `.env.example`ファイルをコピーして`.env`ファイルを作成
-   - 必要なAPIキー（GroqとClaude）を`.env`ファイルに設定
+   - 必要なAPIキー（GroqとGemini）を`.env`ファイルに設定
 
 ## 💻 使い方
 

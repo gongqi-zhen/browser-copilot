@@ -1,12 +1,12 @@
 from groq import Groq
-import anthropic
+import google.generativeai as genai
 
 import os
 import sys
 import re
 
-from langchain_anthropic import ChatAnthropic
-from browser_use import Agent, Browser, BrowserConfig
+from langchain_google_genai import ChatGoogleGenerativeAI
+from browser_use import Agent, SystemPrompt, Browser, BrowserConfig
 import asyncio
 from functools import wraps
 
@@ -20,26 +20,26 @@ load_dotenv(dotenv_path)
 
 
 client_groq = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-
-client_claude = anthropic.Anthropic(
-    api_key=os.environ.get("ANTHROPIC_API_KEY"),
-)
+genai.configure(api_key = os.environ.get("GEMINI_API_KEY"))
 
 SYSTEM_PROMPT = """
 あなたは優秀なAIアシスタントです。
 """
 
-def claude_chat(
-    user_inputs, system_prompt=SYSTEM_PROMPT, main_model="claude-3-5-haiku-20241022"
-):
-    completion = client_claude.messages.create(
-        model=main_model,
-        system=system_prompt,
-        max_tokens=8192,
-        temperature=1,
-        messages=user_inputs,
-    )
-    return completion.content[0].text
+def gemini_chat(user_inputs,system_prompt = SYSTEM_PROMPT,main_model="gemini-2.0-flash"):
+    gemini_model = genai.GenerativeModel(
+        model_name= main_model,
+        system_instruction=system_prompt,
+        )
+    massage_history = []
+    for item in user_inputs[:-1]:
+        if item["role"] == "user":
+            massage_history.append({"role": "user", "parts": item["content"]})
+        elif item["role"] == "assistant":
+            massage_history.append({"role": "model", "parts": item["content"]})
+    gemini_chat = gemini_model.start_chat(history = massage_history)
+    response = gemini_chat.send_message(user_inputs[-1]["content"])
+    return response.text
 
 def extract_tag(text, output_type="text", tag_name="output"):
     if tag_name == "output":
@@ -71,9 +71,9 @@ def sync_wrapper(async_func):
     return sync_func
 
 @sync_wrapper
-async def claude_agent(task, model_name:str="claude-3-7-sonnet-20250219"):
+async def gemini_agent(task, model_name:str="gemini-2.0-pro-exp-02-05"):
     # データベースから設定を取得
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     chrome_path = os.environ.get("CHROME_BROWSER_PATH")
     
     if not api_key:
@@ -88,7 +88,7 @@ async def claude_agent(task, model_name:str="claude-3-7-sonnet-20250219"):
 
         agent = Agent(
             task=task,
-            llm=ChatAnthropic(
+            llm=ChatGoogleGenerativeAI(
                 model=model_name,
                 api_key=api_key,
             ),

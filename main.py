@@ -4,7 +4,7 @@ import numpy as np
 import pyaudio
 import pyttsx3
 import speech_recognition as sr
-from src.API_functions import client_groq, extract_tag, claude_chat, claude_agent
+from src.API_functions import client_groq, extract_tag, gemini_agent, gemini_chat
 
 listener = sr.Recognizer()
 
@@ -239,7 +239,7 @@ def main_task_loop():
         try:
             if level == 0:
                 chat_history.append({"role": "user", "content": user_text})
-                response = claude_chat(chat_history, level_zero_system_prompt)
+                response = gemini_chat(chat_history, level_zero_system_prompt)
                 extracted_tasks = extract_tag(response, "text", "task")
                 if extracted_tasks:
                     task = extracted_tasks
@@ -255,7 +255,7 @@ def main_task_loop():
                     level += 1
                 else:
                     chat_history.append({"role": "user", "content": user_text})
-                    response = claude_chat(chat_history, level_one_system_prompt)
+                    response = gemini_chat(chat_history, level_one_system_prompt)
                     extracted_tasks = extract_tag(response, "text", "task")
                     if extracted_tasks:
                         task = extracted_tasks
@@ -273,9 +273,9 @@ def main_task_loop():
             print("AI: 実行しました。")
             try:
                 print("実行中のタスク:"+str(task))
-                results = claude_agent(task)
+                results = gemini_agent(task)
                 level = 0
-                response = claude_chat([{"role": "user", "content": str(results)}], level_two_system_prompt)
+                response = gemini_chat([{"role": "user", "content": str(results)}], level_two_system_prompt)
                 print("AI: " + str(response))
             except Exception as e:
                 error_message = f"タスク実行中にエラーが発生しました: {str(e)}"
