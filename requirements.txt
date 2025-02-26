@@ -1,12 +1,9 @@
 groq==0.18.0
-google-generativeai==0.8.4
 pyttsx3==2.98
-
+anthropic==0.47.1
 python-dotenv==1.0.1
 
 pyaudio==0.2.14
 SpeechRecognition==3.14.1
 numpy==2.2.3
-
-langchain-google-genai==2.0.10
 browser-use==0.1.40
