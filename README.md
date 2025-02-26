@@ -1,4 +1,5 @@
 # Browser-Copilot
+![image](https://github.com/user-attachments/assets/60926e58-2a27-472a-8dae-5b9825d8b37f)
 
 ブラウザ操作を自動化するAIアシスタント
 
