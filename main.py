@@ -309,6 +309,9 @@ def main():
                             time.sleep(2)  # 少し待機してから再試行
                             continue
                         print(voice_text)
+                        if voice_text == "完全終了":
+                            print("プログラムを終了します。")
+                            break
                 except Exception as e:
                     print(f"マイク入力中にエラーが発生しました: {e}")
                     time.sleep(2)  # 少し待機してから再試行
